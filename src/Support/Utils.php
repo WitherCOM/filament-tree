@@ -4,11 +4,6 @@ namespace SolutionForest\FilamentTree\Support;
 
 class Utils
 {
-    public static function orderColumnName(): string
-    {
-        return config('filament-tree.column_name.order', 'order');
-    }
-
     public static function parentColumnName(): string
     {
         return config('filament-tree.column_name.parent', 'parent_id');
@@ -27,9 +22,9 @@ class Utils
         return config('filament-tree.column_name.title', 'title');
     }
 
-    public static function defaultParentId(): int
+    public static function defaultParentId(): int|string|null
     {
-        return (int) config('filament-tree.default_parent_id', -1);
+        return config('filament-tree.default_parent_id', null);
     }
 
     public static function defaultChildrenKeyName(): string
@@ -59,11 +54,11 @@ class Utils
         $nodeGroups = collect($nodes)->groupBy(fn ($node) => $node[$parentKeyName])->sortKeys();
         foreach ($nodeGroups as $pk => $nodeGroup) {
             $pk = is_numeric($pk) ? intval($pk) : $pk;
-            if ( 
-                ($pk === $parentId) 
+            if (
+                ($pk === $parentId)
                 // Allow parentId is nullable or negative number
                 // https://github.com/solutionforest/filament-tree/issues/28
-                || (($pk === '' || $pk <= 0) && $parentId <= 0) 
+                || (($pk === '' || $pk <= 0) && $parentId <= 0)
             ) {
                 foreach ($nodeGroup as $node) {
                     $node = collect($node)->toArray();

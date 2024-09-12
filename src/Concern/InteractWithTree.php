@@ -33,7 +33,7 @@ trait InteractWithTree
 
         $this->cacheTreeActions();
         $this->cacheTreeEmptyStateActions();
-        
+
         $this->tree->actions(array_values($this->getCachedTreeActions()));
 
         if ($this->hasMounted) {
@@ -105,15 +105,13 @@ trait InteractWithTree
                 ->filter(fn (array $arr) => !is_null($arr['model']));
             foreach ($unnestedArrData as $arr) {
                 $model = $arr['model'];
-                    [$newParentId, $newOrder] = [$arr['data']['parent_id'], $arr['data']['order']];
+                    $newParentId = $arr['data']['parent_id'];
                     if ($model instanceof Model) {
                         $parentColumnName = method_exists($model, 'determineParentColumnName') ? $model->determineParentColumnName() : Utils::parentColumnName();
-                        $orderColumnName = method_exists($model, 'determineOrderColumnName') ? $model->determineOrderColumnName() : Utils::orderColumnName();
                         $newParentId = $newParentId === $defaultParentId && method_exists($model, 'defaultParentKey') ? $model::defaultParentKey() : $newParentId;
 
                         $model->{$parentColumnName} = $newParentId;
-                        $model->{$orderColumnName} = $newOrder;
-                        if ($model->isDirty([$parentColumnName, $orderColumnName])) {
+                        if ($model->isDirty([$parentColumnName])) {
                             $model->save();
 
                             $needReload = true;
@@ -144,7 +142,6 @@ trait InteractWithTree
             $key = data_get($item, 'id');
             $result[$key] = [
                 'parent_id' => $parent,
-                'order' => $index + 1,
             ];
             if (isset($item['children']) && count($item['children'])) {
                 $this->unnestArray($result, $item['children'], $key);

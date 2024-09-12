@@ -19,7 +19,6 @@ trait ModelTree
     {
         if (!empty($this->getFillable())) {
             $this->mergeFillable([
-                $this->determineOrderColumnName(),
                 $this->determineParentColumnName(),
                 $this->determineTitleColumnName(),
             ]);
@@ -32,11 +31,8 @@ trait ModelTree
     public static function bootModelTree()
     {
         static::saving(function(Model $model) {
-            if (empty($model->{$model->determineParentColumnName()}) || $model->{$model->determineParentColumnName()} === -1) {
+            if (empty($model->{$model->determineParentColumnName()}) || $model->{$model->determineParentColumnName()} === null) {
                 $model->{$model->determineParentColumnName()} = static::defaultParentKey();
-            }
-            if (empty($model->{$model->determineOrderColumnName()}) || $model->{$model->determineOrderColumnName()} === 0) {
-                $model->setHighestOrderNumber();
             }
         });
 
@@ -52,7 +48,7 @@ trait ModelTree
 
     public function children(): HasMany
     {
-        return $this->hasMany(static::class, $this->determineParentColumnName())->with('children')->orderBy($this->determineOrderColumnName());
+        return $this->hasMany(static::class, $this->determineParentColumnName())->with('children');
     }
 
     public function isRoot(): bool
@@ -60,34 +56,14 @@ trait ModelTree
         return $this->getAttributeValue($this->determineParentColumnName()) === static::defaultParentKey();
     }
 
-    public function setHighestOrderNumber(): void
-    {
-        $this->{$this->determineOrderColumnName()} = $this->getHighestOrderNumber() + 1;
-    }
-
-    public function getHighestOrderNumber(): int
-    {
-        return (int) $this->buildSortQuery()->where($this->determineParentColumnName(), $this->{$this->determineParentColumnName()})->max($this->determineOrderColumnName());
-    }
-
-    public function getLowestOrderNumber(): int
-    {
-        return (int) $this->buildSortQuery()->where($this->determineParentColumnName(), $this->{$this->determineParentColumnName()})->min($this->determineOrderColumnName());
-    }
-
     public function scopeOrdered(Builder $query, string $direction = 'asc')
     {
-        return $query->orderBy($this->determineParentColumnName(), 'asc')->orderBy($this->determineOrderColumnName(), $direction);
+        return $query->orderBy($this->determineParentColumnName(), 'asc');
     }
 
     public function scopeIsRoot(Builder $query)
     {
         return $query->where($this->determineParentColumnName(), static::defaultParentKey());
-    }
-
-    public function determineOrderColumnName() : string
-    {
-        return Utils::orderColumnName();
     }
 
     public function determineParentColumnName() : string
