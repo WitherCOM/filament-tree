@@ -1,6 +1,7 @@
 {
     "name": "solution-forest/filament-tree",
     "description": "This is a tree layout plugin for Filament Admin",
+    "version": "0.2.1",
     "keywords": [
         "Solution Forest",
         "laravel",
