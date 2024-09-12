@@ -181,20 +181,13 @@ trait HasActions
 
     public function mountedTreeActionShouldOpenModal(): bool
     {
-        return ($this->getMountedTreeAction())->shouldOpenModal(
-            checkForFormUsing: $this->mountedTableActionHasForm(...),
-        );
-        // $action = $this->getMountedTreeAction();
+        $action = $this->getMountedTreeAction();
 
-        // if ($action->shouldOpenModal()) {
-        //     return false;
-        // }
-
-        // return $action->getModalDescription() ||
-        //     $action->getModalContent() ||
-        //     $action->getModalContentFooter() ||
-        //     $action->getInfolist() ||
-        //     $this->mountedTreeActionHasForm();
+        return $action->getModalDescription() ||
+            $action->getModalContent() ||
+            $action->getModalContentFooter() ||
+            $action->getInfolist() ||
+            $this->mountedTreeActionHasForm();
     }
 
     public function getCachedTreeActions(): array
